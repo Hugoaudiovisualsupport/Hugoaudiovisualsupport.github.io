@@ -1,2 +1,119 @@
 # Hugoaudiovisualsupport.github.io
 AR Repositry
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+  <title>Event AR Prototype</title>
+
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+    }
+
+    #instructions {
+      position: fixed;
+      z-index: 10;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      padding: 14px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.75);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    #info {
+      display: none;
+      position: fixed;
+      z-index: 20;
+      bottom: 24px;
+      left: 16px;
+      right: 16px;
+      padding: 20px;
+      border-radius: 16px;
+      background: white;
+      color: #111;
+    }
+
+    #info button {
+      padding: 12px 18px;
+      border: 0;
+      border-radius: 8px;
+      background: #222;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="instructions">
+    Point the camera at the event poster
+  </div>
+
+  <div id="info">
+    <h2>Discover this installation</h2>
+    <p>This is your interactive information panel.</p>
+    <button id="closeInfo">Close</button>
+  </div>
+
+  <a-scene
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart: true"
+    color-space="sRGB"
+    renderer="colorManagement: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
+
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false">
+    </a-camera>
+
+    <a-entity mindar-image-target="targetIndex: 0">
+
+      <!-- Replace this with your own Blender model -->
+      <a-gltf-model
+        src="./assets/scene.glb"
+        position="0 0 0.1"
+        rotation="0 0 0"
+        scale="0.2 0.2 0.2">
+      </a-gltf-model>
+
+      <!-- A visible test hotspot -->
+      <a-sphere
+        position="0.35 0.15 0.2"
+        radius="0.045"
+        color="#00D6A0"
+        material="shader: flat">
+      </a-sphere>
+
+    </a-entity>
+  </a-scene>
+
+  <script>
+    const info = document.getElementById("info");
+
+    document.getElementById("closeInfo").addEventListener("click", () => {
+      info.style.display = "none";
+    });
+
+    // Temporary test: tap the instruction banner
+    // to check that the information panel works.
+    document.getElementById("instructions")
+      .addEventListener("click", () => {
+        info.style.display = "block";
+      });
+  </script>
+</body>
+</html>
