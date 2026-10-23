@@ -72,20 +72,31 @@
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false">
 
+    
+
     <a-camera
       position="0 0 0"
       look-controls="enabled: false">
     </a-camera>
 
-    <a-entity mindar-image-target="targetIndex: 0">
 
-      <!-- Replace this with your own Blender model -->
-      <a-gltf-model
-        src="./assets/scene.glb"
-        position="0 0 0.1"
-        rotation="0 0 0"
-        scale="0.2 0.2 0.2">
-      </a-gltf-model>
+      <!-- First printed image -->
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-gltf-model
+          src="./assets/scene.glb"
+          position="0 0 0.1"
+          scale="0.2 0.2 0.2">
+        </a-gltf-model>
+      </a-entity>
+      
+      <!-- Second printed image -->
+      <a-entity mindar-image-target="targetIndex: 1">
+        <a-gltf-model
+          src="./assets/EESRFAudit2.glb"
+          position="0 0 0.1"
+          scale="0.2 0.2 0.2">
+        </a-gltf-model>
+      </a-entity>
 
       <!-- A visible test hotspot -->
       <a-sphere
