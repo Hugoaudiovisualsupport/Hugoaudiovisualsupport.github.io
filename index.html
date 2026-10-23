@@ -121,8 +121,28 @@
     <button id="closeInfo">Continue exploring</button>
   </div>
 
+    <button id="exploreButton" style="
+    display:none;
+    position:fixed;
+    z-index:15;
+    bottom:max(24px, env(safe-area-inset-bottom));
+    left:20px;
+    right:20px;
+    width:calc(100% - 40px);
+    padding:17px;
+    border:0;
+    border-radius:14px;
+    background:#a8f0ce;
+    color:#14251d;
+    font-size:16px;
+    font-weight:700;
+    touch-action:manipulation;
+  ">
+    Explore this country
+  </button>
+    
   <a-scene
-    mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; filterMinCF: 0.0001; filterBeta: 1000"
+    mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; filterMinCF: 0.001; filterBeta: 0.01"
     color-space="sRGB"
     renderer="colorManagement: true"
     vr-mode-ui="enabled: false"
@@ -182,16 +202,36 @@
       }
     };
 
-    // Open the relevant country card when its model is tapped.
-    document.querySelectorAll(".clickable").forEach((model) => {
-      model.addEventListener("click", () => {
-        const country = countries[model.dataset.country];
-        if (!country) return;
-
-        infoTitle.textContent = country.name;
-        infoText.textContent = country.description;
-        info.style.display = "block";
+    const exploreButton = document.getElementById("exploreButton");
+    let activeCountry = null;
+    
+    function setupCountryTarget(targetId, countryKey) {
+      const target = document.getElementById(targetId);
+    
+      target.addEventListener("targetFound", () => {
+        activeCountry = countryKey;
+        exploreButton.style.display = "block";
       });
+    
+      target.addEventListener("targetLost", () => {
+        if (activeCountry === countryKey) {
+          activeCountry = null;
+          exploreButton.style.display = "none";
+        }
+      });
+    }
+    
+    setupCountryTarget("belgiumTarget", "belgium");
+    setupCountryTarget("franceTarget", "france");
+    
+    exploreButton.addEventListener("click", () => {
+      if (!activeCountry) return;
+    
+      const country = countries[activeCountry];
+    
+      infoTitle.textContent = country.name;
+      infoText.textContent = country.description;
+      info.style.display = "block";
     });
 
     // Close the information card.
@@ -199,31 +239,42 @@
       info.style.display = "none";
     });
 
-    // Animate each model when its corresponding image is detected.
     function addEntranceAnimation(targetId, modelId, finalScale) {
       const target = document.getElementById(targetId);
       const model = document.getElementById(modelId);
-
-      target.addEventListener("targetFound", () => {
-        // Don't animate before the GLB has loaded.
-        if (!model.getObject3D("mesh")) return;
-
+    
+      let modelLoaded = false;
+      let targetVisible = false;
+    
+      model.addEventListener("model-loaded", () => {
+        modelLoaded = true;
+        if (targetVisible) animateModel();
+      });
+    
+      function animateModel() {
         model.removeAttribute("animation__enter");
+    
         model.setAttribute("scale", "0.001 0.001 0.001");
-
+    
         model.setAttribute("animation__enter", {
           property: "scale",
           from: "0.001 0.001 0.001",
           to: finalScale,
-          dur: 650,
-          easing: "easeOutCubic",
-          startEvents: "ar-enter"
+          dur: 700,
+          easing: "easeOutCubic"
         });
-
-        model.emit("ar-enter");
+      }
+    
+      target.addEventListener("targetFound", () => {
+        targetVisible = true;
+        if (modelLoaded) animateModel();
+      });
+    
+      target.addEventListener("targetLost", () => {
+        targetVisible = false;
       });
     }
-
+    
     addEntranceAnimation("belgiumTarget", "belgiumModel", "1 1 1");
     addEntranceAnimation("franceTarget", "franceModel", "0.2 0.2 0.2");
   </script>
