@@ -162,7 +162,7 @@
         class="clickable"
         data-country="belgium"
         src="./assets/scene.glb"
-        position="0 0 0.1"
+        position="0.25 0 0.1"
         rotation="0 90 0"
         scale="0.3 0.3 0.3"
       </a-gltf-model>
@@ -207,17 +207,30 @@
     
     function setupCountryTarget(targetId, countryKey) {
       const target = document.getElementById(targetId);
+      let lossTimer = null;
     
       target.addEventListener("targetFound", () => {
+        clearTimeout(lossTimer);
+        lossTimer = null;
+    
+        target.object3D.visible = true;
+    
         activeCountry = countryKey;
         exploreButton.style.display = "block";
       });
     
       target.addEventListener("targetLost", () => {
-        if (activeCountry === countryKey) {
-          activeCountry = null;
-          exploreButton.style.display = "none";
-        }
+        // Allow a brief tracking dropout before hiding everything.
+        clearTimeout(lossTimer);
+    
+        lossTimer = setTimeout(() => {
+          target.object3D.visible = false;
+    
+          if (activeCountry === countryKey) {
+            activeCountry = null;
+            exploreButton.style.display = "none";
+          }
+        }, 750);
       });
     }
     
@@ -239,24 +252,33 @@
       info.style.display = "none";
     });
 
-    function addEntranceAnimation(targetId, modelId, finalScale) {
+    function addEntranceAnimation(targetId, modelId, finalScale, finalPosition) {
       const target = document.getElementById(targetId);
       const model = document.getElementById(modelId);
     
       let modelLoaded = false;
       let targetVisible = false;
-    
-      model.addEventListener("model-loaded", () => {
-        modelLoaded = true;
-        if (targetVisible) animateModel();
-      });
+      let hasAnimated = false;
     
       function animateModel() {
-        model.removeAttribute("animation__enter");
+        if (!modelLoaded || !targetVisible || hasAnimated) return;
+    
+        hasAnimated = true;
+    
+        const [x, y, z] = finalPosition.split(" ").map(Number);
     
         model.setAttribute("scale", "0.001 0.001 0.001");
+        model.setAttribute("position", `${x} ${y - 0.15} ${z}`);
     
-        model.setAttribute("animation__enter", {
+        model.setAttribute("animation__rise", {
+          property: "position",
+          from: `${x} ${y - 0.15} ${z}`,
+          to: finalPosition,
+          dur: 700,
+          easing: "easeOutCubic"
+        });
+    
+        model.setAttribute("animation__scale", {
           property: "scale",
           from: "0.001 0.001 0.001",
           to: finalScale,
@@ -265,9 +287,14 @@
         });
       }
     
+      model.addEventListener("model-loaded", () => {
+        modelLoaded = true;
+        animateModel();
+      });
+    
       target.addEventListener("targetFound", () => {
         targetVisible = true;
-        if (modelLoaded) animateModel();
+        animateModel();
       });
     
       target.addEventListener("targetLost", () => {
@@ -275,8 +302,19 @@
       });
     }
     
-    addEntranceAnimation("belgiumTarget", "belgiumModel", "0.3 0.3 0.3");
-    addEntranceAnimation("franceTarget", "franceModel", "0.2 0.2 0.2");
+    addEntranceAnimation(
+      "belgiumTarget",
+      "belgiumModel",
+      "0.3 0.3 0.3",
+      "0.25 0 0.1"
+    );
+    
+    addEntranceAnimation(
+      "franceTarget",
+      "franceModel",
+      "0.2 0.2 0.2",
+      "0 0 0.1"
+    );
   </script>
 </body>
 </html>
