@@ -127,26 +127,38 @@
 
     
 
+    
     <a-camera
       position="0 0 0"
-      look-controls="enabled: false">
+      look-controls="enabled: false"
+      cursor="rayOrigin: mouse; fuse: false"
+      raycaster="objects: .clickable; far: 1000">
     </a-camera>
+
 
 
       <!-- First printed image -->
       <a-entity mindar-image-target="targetIndex: 0">
+      
         <a-gltf-model
+          class="clickable"
+          data-country="belgium"
           src="./assets/scene.glb"
           position="0 0 0.1"
-          scale="0.2 0.2 0.2">
+          rotation="0 0 0"
+          scale="1 1 1">
         </a-gltf-model>
+      
       </a-entity>
       
       <!-- Second printed image -->
       <a-entity mindar-image-target="targetIndex: 1">
         <a-gltf-model
+          class="clickable"
+          data-country="france"
           src="./assets/EESRFAudit2.glb"
           position="0 0 0.1"
+          rotation="0 0 0"
           scale="0.2 0.2 0.2">
         </a-gltf-model>
       </a-entity>
@@ -164,17 +176,49 @@
 
   <script>
     const info = document.getElementById("info");
-
+    const infoTitle = document.getElementById("infoTitle");
+    const infoText = document.getElementById("infoText");
+    const instructions = document.getElementById("instructions");
+    
+    const countries = {
+      belgium: {
+        name: "Belgium",
+        description:
+          "Capital: Brussels. Explore Belgium's culture, heritage and role at the heart of Europe."
+      },
+    
+      france: {
+        name: "France",
+        description:
+          "Capital: Paris. Discover France's regions, cultural heritage and European connections."
+      }
+    };
+    
+    // Show the correct information when a 3D model is tapped.
+    document.querySelectorAll(".clickable").forEach((model) => {
+      model.addEventListener("click", () => {
+        const country = countries[model.dataset.country];
+    
+        if (!country) return;
+    
+        infoTitle.textContent = country.name;
+        infoText.textContent = country.description;
+        info.style.display = "block";
+      });
+    });
+    
+    // Close the information panel.
     document.getElementById("closeInfo").addEventListener("click", () => {
       info.style.display = "none";
     });
-
-    // Temporary test: tap the instruction banner
-    // to check that the information panel works.
-    document.getElementById("instructions")
-      .addEventListener("click", () => {
-        info.style.display = "block";
-      });
+    
+    // Keep the banner as a temporary way to test the panel.
+    instructions.addEventListener("click", () => {
+      infoTitle.textContent = "Discover this installation";
+      infoText.textContent =
+        "Tap a 3D object to explore its country.";
+      info.style.display = "block";
+    });
   </script>
 </body>
 </html>
